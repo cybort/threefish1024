@@ -15,9 +15,7 @@ Functions threefish_encrypt_1024 and threefish_decrypt_1024 are based on
  skein hash staging driver:
 https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git/tree/drivers/staging/skein/threefish_block.c
 
-It has 1024 bits of key size and an additional "tweak" operating mode 
-that adds 128 bits of additional security (assuming the header of LUKS 
-encrypted container is detached and kept safe).
+It has 1024 bits of key size and an additional "tweak" operating mode. This mode doesn't need random counter or Initialization Vector, you can use plain IV (plain or plain64) safely as XTS mode uses.
 
 Security:
 =========
@@ -26,18 +24,15 @@ A cipher with NO CRYPTOGRAPHIC BREAK gives an attacker nothing more than
  brute-forcing an interactive password or the master key as options. 
  This is the case of Threefish.
 
-Let's suppose that all atoms in the known universe (believed to be 
-something like 10^82) are converted into a supercomputer with the same 
-power of Tianhe-2 (which has 33.86 petaflops per second) and all those 
+Let's suppose that each atom in the known universe (believed to be 
+something like 10^82) is converted into a supercomputer with the same 
+power of OLCF-4 (which has 200 petaflops per second). Now, all those 
 are driven to brute-force a random 1024 bit key; remembering that one 
 year has 31556952 seconds.
 
-Let's calculate: 2^1023/((10^82)*33860000000000000*31556952)
+Let's calculate: 2^1023/((10^82)*200000000000000000*31556952)
 
-It would take approximately 8412083234811285438276133633303000914097248789674568517634535662649311503726480420282178093713947402183853808717115005141050182744130373434515253332290996405288720990829658240228438264112680455935627271 years to find the correct key!
-
-^ Not to mention that a simple 64 bit tweak in Threefish would make such 
-attack 18446744073709551616 times harder.
+It would take approximately 1424165691653550624700149424118198054756664220091904450035526887686528437580893135153772751265771295189726449815807570370379795938581272222463432389156865691415380463747461140070674598114276801189901697 years to find the correct key!
 
 This seems amazing, but never forget that no cipher is secure forever, 
 some older ciphers with large key sizes are broken today, you'll never 
@@ -67,12 +62,11 @@ Make sure you have Linux Kernel headers installed.
 
     $ cryptsetup luksFormat /dev/loop0 -c threefish-tweak-plain64 -s 1024
 
-    For getting the additional tweak strength, the header of container 
-    must be detached from the volume and kept safe:
+    With a detached header is always more secure.
 
     $ cryptsetup luksFormat /dev/loop0 --header ./myheader -c threefish-tweak-plain64 -s 1024
 
-    Make a backup of header, mount with --header option.
+    Make a backup of header, open it with --header option.
 
 Warnings:
 =========
@@ -88,10 +82,10 @@ used with an external key file:
 
       $ dd if=/dev/urandom of=./key.001 bs=1 count=128
 
-   Create an encryped container with a password iterated for 5 secs and 
+   Create an encryped container with a password iterated for 10 secs and 
       this key file:
 
-      $ cryptsetup luksFormat /dev/loop0 -c threefish-tweak-plain64 -s 1024 --key-file ./key001 --iter-time 5000
+      $ cryptsetup luksFormat /dev/loop0 -c threefish-tweak-plain64 -s 1024 --key-file ./key001 --iter-time 10000
 
 * This tool will not save your ass if you live in a country that has 
 laws for key disclosure or prohibits the usage of encryption tools. You 
@@ -112,6 +106,8 @@ Threefish is a good option.
 Here the tests with Threefish with 1024 bits key + tweak and other 
 common ciphers with different key sizes. AES and Camellia not included 
 for using AES instructions.
+
+
 
            Algorithm  |  Key |  Encryption |  Decryption
 
