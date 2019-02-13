@@ -1,19 +1,18 @@
-Threefish1024 v0.1
+Threefish1024 v0.2
 ==================
 ++++++++++++++++++
 
 * 06/02/2018
   First release.
 
-Threefish1024 is an *EXPERIMENTAL* Threefish implementation for Linux 
-filesystem encryption. Use at your risk.
+Threefish1024 is an experimetal Threefish implementation for Linux 
+filesystem encryption.
 
 It is a modified version of original Threefish512 from 
 https://github.com/bogdankernel/threefish_512
 
-Functions threefish_encrypt_1024 and threefish_decrypt_1024 are based on
- skein hash staging driver:
-https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git/tree/drivers/staging/skein/threefish_block.c
+Functions threefish_encrypt_1024 and threefish_decrypt_1024 are based
+on last version of skein hash staging driver: https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/drivers/staging/skein/threefish_block.c?h=linux-4.17.y
 
 It has 1024 bits of key size and an additional "tweak" operating mode. This mode doesn't need random counter or Initialization Vector, you can use plain IV (plain or plain64) safely as XTS mode uses.
 
